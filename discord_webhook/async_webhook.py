@@ -48,13 +48,17 @@ class AsyncDiscordWebhook(DiscordWebhook):
     async def api_post_request(self, url):
         async with self.http_client as client:  # type: httpx.AsyncClient
             if bool(self.files) is False:
-                response = await client.post(url, json=self.json,
-                                             params={'wait': True},
-                                             timeout=self.timeout)
+                response = await client.post(
+                    url, json=self.json, params={"wait": True}, timeout=self.timeout
+                )
             else:
-                self.files["payload_json"] = (None, json.dumps(self.json).encode('utf-8'))
-                response = await client.post(url, files=self.files,
-                                             timeout=self.timeout)
+                self.files["payload_json"] = (
+                    None,
+                    json.dumps(self.json).encode("utf-8"),
+                )
+                response = await client.post(
+                    url, files=self.files, timeout=self.timeout
+                )
         return response
 
     async def execute(self, remove_embeds=False, remove_files=False):
@@ -102,24 +106,33 @@ class AsyncDiscordWebhook(DiscordWebhook):
             self.remove_files()
         return responses[0] if len(responses) == 1 else responses
 
-    async def edit(self, sent_webhook):
+    async def edit(self, sent_message_id):
         """
         edits the webhook passed as a response
-        :param sent_webhook: webhook.execute() response
+        :param sent_message_id: message_id
         :return: Another webhook response
         """
-        sent_webhook = sent_webhook if isinstance(sent_webhook, list) else [sent_webhook]
-        webhook_len = len(sent_webhook)
+        sent_message_id = [sent_message_id]
+        webhook_len = len(sent_message_id)
         responses = []
         async with self.http_client as client:  # type: httpx.AsyncClient
-            for i, webhook in enumerate(sent_webhook):
-                previous_sent_message_id = json.loads(webhook.content.decode('utf-8'))['id']
-                url = webhook.url.split('?')[0] + '/messages/' + str(previous_sent_message_id)  # removes any query params
+            for i, message_id in enumerate(sent_message_id):
+                url = self.url.split("?")[0] + "/messages/" + str(message_id)
                 if bool(self.files) is False:
-                    patch_kwargs = {'json': self.json, 'params': {'wait': True}, 'timeout': self.timeout}
+                    patch_kwargs = {
+                        "json": self.json,
+                        "params": {"wait": True},
+                        "timeout": self.timeout,
+                    }
                 else:
-                    self.files["payload_json"] = (None, json.dumps(self.json))
-                    patch_kwargs = {'files': self.files, 'timeout': self.timeout}
+                    self.files["payload_json"] = (
+                        None,
+                        json.dumps(self.json).encode("utf-8"),
+                    )
+                    patch_kwargs = {
+                        "files": self.files,
+                        "timeout": self.timeout,
+                    }
                 response = await client.patch(url, **patch_kwargs)
                 if response.status_code in [200, 204]:
                     logger.debug(
@@ -152,20 +165,20 @@ class AsyncDiscordWebhook(DiscordWebhook):
                 responses.append(response)
         return responses[0] if len(responses) == 1 else responses
 
-    async def delete(self, sent_webhook):
+    async def delete(self, sent_message_ids=[]):
         """
         deletes the webhook passed as a response
-        :param sent_webhook: webhook.execute() response
+        :param sent_message_ids: message ids
         :return: Response
         """
-        sent_webhook = sent_webhook if isinstance(sent_webhook, list) else [sent_webhook]
-        webhook_len = len(sent_webhook)
+        webhook_len = len(sent_message_ids)
         responses = []
         async with self.http_client as client:  # type: httpx.AsyncClient
-            for i, webhook in enumerate(sent_webhook):
-                url = webhook.url.split('?')[0]  # removes any query params
-                previous_sent_message_id = json.loads(webhook.content.decode('utf-8'))['id']
-                response = await client.delete(url + '/messages/' + str(previous_sent_message_id), timeout=self.timeout)
+            for i, message_id in enumerate(sent_message_ids):
+                response = await client.delete(
+                    self.url.split("?")[0] + "/messages/" + str(message_id),
+                    timeout=self.timeout,
+                )
                 if response.status_code in [200, 204]:
                     logger.debug(
                         "[{index}/{length}] Webhook deleted".format(
@@ -192,11 +205,9 @@ class AsyncDiscordWebhook(DiscordWebhook):
         :return: Response
         """
         errors = response.json()
-        wh_sleep = (int(errors['retry_after']) / 1000) + 0.15
+        wh_sleep = (int(errors["retry_after"]) / 1000) + 0.15
         await asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
-            "seconds...".format(
-                wh_sleep=wh_sleep
-            )
+            "seconds...".format(wh_sleep=wh_sleep)
         )
