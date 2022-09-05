@@ -231,10 +231,10 @@ class AsyncDiscordWebhook(DiscordWebhook):
         :return: Response
         """
         wh_sleep = await self.get_wait_time(response)
-        await asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
             "seconds... {identifier}".format(
                 wh_sleep=wh_sleep, identifier=self.webhook_identifier
             )
         )
+        await asyncio.sleep(wh_sleep)
