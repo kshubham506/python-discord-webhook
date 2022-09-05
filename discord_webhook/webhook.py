@@ -231,6 +231,9 @@ class DiscordWebhook:
     allowed_mentions: List[str]
     timeout: Optional[float]
     rate_limit_retry: bool = False
+    rate_limit_max_sleep: Optional[float]
+    rate_limit_max_retries: Optional[int] = (10,)
+    webhook_identifier: Optional[str] = ("",)
 
     def __init__(
         self,
@@ -245,7 +248,10 @@ class DiscordWebhook:
         proxies: Optional[Dict[str, str]] = None,
         timeout: Optional[float] = None,
         rate_limit_retry: bool = False,
+        rate_limit_max_sleep: Optional[float] = None,
+        rate_limit_max_retries: Optional[int] = 10,
         allowed_mentions: Optional[List[str]] = None,
+        webhook_identifier: Optional[str] = "",
     ) -> None:
         """
         Init Webhook for Discord
@@ -280,6 +286,9 @@ class DiscordWebhook:
         self.allowed_mentions = allowed_mentions
         self.timeout = timeout
         self.rate_limit_retry = rate_limit_retry
+        self.rate_limit_max_sleep = rate_limit_max_sleep
+        self.rate_limit_max_retries = rate_limit_max_retries
+        self.webhook_identifier = webhook_identifier
 
     def add_file(self, file: bytes, filename: str) -> None:
         """

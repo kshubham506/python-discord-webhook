@@ -80,7 +80,18 @@ class AsyncDiscordWebhook(DiscordWebhook):
                     )
                 )
             elif response.status_code == 429 and self.rate_limit_retry:
-                while response.status_code == 429:
+                _current = 0
+                while (
+                    response.status_code == 429
+                    and _current < self.rate_limit_max_retries
+                ):
+                    _current = _current + 1
+                    if (
+                        self.rate_limit_max_sleep > 0
+                        and not await self.get_wait_time(response)
+                        < self.rate_limit_max_sleep
+                    ):
+                        break
                     await self.handle_rate_limit(response)
                     response = await self.api_post_request(url)
                     if response.status_code in [200, 204]:
@@ -142,7 +153,18 @@ class AsyncDiscordWebhook(DiscordWebhook):
                         )
                     )
                 elif response.status_code == 429 and self.rate_limit_retry:
-                    while response.status_code == 429:
+                    _current = 0
+                    while (
+                        response.status_code == 429
+                        and _current < self.rate_limit_max_retries
+                    ):
+                        _current = _current + 1
+                        if (
+                            self.rate_limit_max_sleep > 0
+                            and not await self.get_wait_time(response)
+                            < self.rate_limit_max_sleep
+                        ):
+                            break
                         await self.handle_rate_limit(response)
                         response = await client.patch(url, **patch_kwargs)
                         if response.status_code in [200, 204]:
@@ -198,16 +220,21 @@ class AsyncDiscordWebhook(DiscordWebhook):
                 responses.append(response)
         return responses[0] if len(responses) == 1 else responses
 
+    async def get_wait_time(self, response) -> float:
+        errors = response.json()
+        return (int(errors["retry_after"]) / 1000) + 0.15
+
     async def handle_rate_limit(self, response):
         """
         handles the rate limit
         :param response: Response
         :return: Response
         """
-        errors = response.json()
-        wh_sleep = (int(errors["retry_after"]) / 1000) + 0.15
+        wh_sleep = await self.get_wait_time(response)
         await asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
-            "seconds...".format(wh_sleep=wh_sleep)
+            "seconds... {identifier}".format(
+                wh_sleep=wh_sleep, identifier=self.webhook_identifier
+            )
         )
