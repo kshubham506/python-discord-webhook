@@ -364,7 +364,7 @@ class DiscordWebhook:
         data = {
             key: value
             for key, value in self.__dict__.items()
-            if value and key not in {"url", "files", "filename"}
+            if value and key not in {"url", "files", "filename", "id"}
         }
         embeds_empty = not any(data["embeds"]) if "embeds" in data else True
         if embeds_empty and "content" not in data and bool(self.files) is False:
