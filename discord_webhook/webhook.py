@@ -445,7 +445,7 @@ class DiscordWebhook:
                     wh_sleep = (int(errors["retry_after"]) / 1000) + 0.15
                     time.sleep(wh_sleep)
                     logger.error(
-                        f"Webhook rate limited: sleeping for {wh_sleep} " "seconds..."
+                        f"Webhook rate limited: sleeping for {wh_sleep} seconds..."
                     )
                     response = self.api_post_request(url)
                     if response.status_code in [200, 204]:
@@ -453,9 +453,9 @@ class DiscordWebhook:
                         break
             else:
                 logger.error(
-                    f"[{i+1}/{urls_len}] Webhook status code {response.status_code}: {response.content.decode('utf-8')}"
+                    f"[{i+1}/{urls_len}] Webhook status code {response.status_code}:"
+                    f" {response.content.decode('utf-8')}"
                 )
-            )
         if remove_embeds:
             self.remove_embeds()
         if remove_files:
@@ -517,9 +517,9 @@ class DiscordWebhook:
                         break
             else:
                 logger.error(
-                    f"[{i+1}/{len(sent_webhook)}] Webhook status code {response.status_code}: {response.content.decode('utf-8')}"
+                    f"[{i+1}/{len(sent_webhook)}] Webhook status code"
+                    f" {response.status_code}: {response.content.decode('utf-8')}"
                 )
-            )
         return response
 
     def delete(
@@ -545,7 +545,8 @@ class DiscordWebhook:
                 logger.debug(f"[{i+1}/{len(sent_webhook)}] Webhook deleted")
             else:
                 logger.error(
-                    f"[{i+1}/{len(sent_webhook)}] Webhook status code {response.status_code}: {response.content.decode('utf-8')}"
+                    f"[{i+1}/{len(sent_webhook)}] Webhook status code"
+                    f" {response.status_code}: {response.content.decode('utf-8')}"
                 )
             responses.append(response)
         return responses[0] if len(responses) == 1 else responses

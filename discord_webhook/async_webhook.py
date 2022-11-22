@@ -66,7 +66,6 @@ class AsyncDiscordWebhook(DiscordWebhook):
                 )
         return response
 
-   
     async def execute(self, remove_embeds=False, remove_files=False):
         """
         executes the Webhook
@@ -109,14 +108,14 @@ class AsyncDiscordWebhook(DiscordWebhook):
                         break
             else:
                 logger.error(
-                    "[{index}/{length}] Webhook status code {status_code}: {content}".format(
+                    "[{index}/{length}] Webhook status code {status_code}: {content}"
+                    .format(
                         index=i + 1,
                         length=urls_len,
                         status_code=response.status_code,
                         content=response.content.decode("utf-8"),
                     )
                 )
-            )
         if remove_embeds:
             self.remove_embeds()
         if remove_files:
@@ -185,14 +184,14 @@ class AsyncDiscordWebhook(DiscordWebhook):
                             break
                 else:
                     logger.error(
-                        "[{index}/{length}] Webhook status code {status_code}: {content}".format(
+                        "[{index}/{length}] Webhook status code {status_code}:"
+                        " {content}".format(
                             index=i + 1,
                             length=webhook_len,
                             status_code=response.status_code,
                             content=response.content.decode("utf-8"),
                         )
                     )
-                )
             return response
 
     async def delete(self, sent_message_ids=[]):
@@ -218,7 +217,8 @@ class AsyncDiscordWebhook(DiscordWebhook):
                     )
                 else:
                     logger.error(
-                        "[{index}/{length}] Webhook status code {status_code}: {content}".format(
+                        "[{index}/{length}] Webhook status code {status_code}:"
+                        " {content}".format(
                             index=i + 1,
                             length=webhook_len,
                             status_code=response.status_code,
@@ -231,7 +231,7 @@ class AsyncDiscordWebhook(DiscordWebhook):
     async def get_wait_time(self, response) -> float:
         errors = response.json()
         if not response.headers.get('Via'):
-                raise HTTPException(errors)
+            raise HTTPException(errors)
         return (int(errors["retry_after"]) / 1000) + 0.15
 
     async def handle_rate_limit(self, response):
