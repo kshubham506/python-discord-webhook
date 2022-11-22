@@ -16,6 +16,7 @@ pip install discord-webhook
 ## Examples
 
 * [Basic Webhook](#basic-webhook)
+* [Create Multiple Instances](#create-multiple-instances)
 * [Manage Being Rate Limited](#manage-being-rate-limited)
 * [Multiple Webhook Urls](#multiple-webhook-urls)
 * [Embedded Content](#webhook-with-embedded-content)
@@ -35,6 +36,17 @@ from discord_webhook import DiscordWebhook
 
 webhook = DiscordWebhook(url='your webhook url', content='Webhook Message')
 response = webhook.execute()
+```
+
+### Create multiple instances
+
+```python
+from discord_webhook import DiscordWebhook
+
+# you can provide any kwargs except url
+webhook1, webhook2 = DiscordWebhook.create_batch(urls=['first url', 'second url'], content='Webhook Message')
+response1 = webhook1.execute()
+response2 = webhook2.execute()
 ```
 
 ### Manage being Rate Limited
@@ -140,7 +152,7 @@ response = webhook.execute()
 
 ![Image](img/extended_embed2.png "Example Embed Result")
 
-By Default, The Embed fields are placed side by side. We can arrange them in a new line by setting `inline=False` as follows:
+By Default, the Embed fields are placed side by side. We can arrange them in a new line by setting `inline=False` as follows:
 
 ```python
 from discord_webhook import DiscordWebhook, DiscordEmbed
@@ -176,10 +188,10 @@ from discord_webhook import DiscordWebhook
 from time import sleep
 
 webhook = DiscordWebhook(url='your webhook url', content='Webhook content before edit')
-sent_webhook = webhook.execute()
+webhook.execute()
 webhook.content = 'After Edit'
 sleep(10)
-sent_webhook = webhook.edit(sent_webhook)
+webhook.edit()
 ```
 
 ### Delete Webhook Messages
@@ -189,9 +201,9 @@ from discord_webhook import DiscordWebhook
 from time import sleep
 
 webhook = DiscordWebhook(url='your webhook url', content='Webhook Content')
-sent_webhook = webhook.execute()
+webhook.execute()
 sleep(10)
-webhook.delete(sent_webhook)
+webhook.delete()
 ```
 
 ### Send Files
@@ -363,8 +375,7 @@ from discord_webhook import AsyncDiscordWebhook
 
 
 async def send_webhook(message):
-    webhook = AsyncDiscordWebhook(url='your webhook url',
-                                  content=message)
+    webhook = AsyncDiscordWebhook(url='your webhook url', content=message)
     await webhook.execute()
 
 
@@ -377,3 +388,24 @@ async def main():
 
 asyncio.run(main())
 ```
+
+## Development
+
+### Dev Setup
+This project uses [Poetry](https://python-poetry.org/docs/) for dependency management and packaging.
+
+Install Poetry and add Poetry to [Path](https://python-poetry.org/docs/#installation).
+
+**Debian / Ubuntu / Mac**
+
+`curl -sSL https://install.python-poetry.org | python3 -`
+
+**Windows**
+
+open powershell and run: `(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -`
+
+Install dependencies: `poetry install`
+
+Install the defined pre-commit hooks: `poetry run pre-commit install`
+
+Activate the virtualenv: `poetry shell`

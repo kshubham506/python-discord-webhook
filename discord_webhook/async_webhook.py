@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
+from functools import partial
+from http.client import HTTPException
 
 from . import DiscordWebhook
 
@@ -26,15 +28,15 @@ class AsyncDiscordWebhook(DiscordWebhook):
             import httpx  # noqa
         except ImportError:  # pragma: nocover
             raise ImportError(
-                "You're attempting to use the async version of discord-webhooks but didn't"
-                " install it using `pip install discord-webhook[async]`."
+                "You're attempting to use the async version of discord-webhooks but"
+                " didn't install it using `pip install discord-webhook[async]`."
             ) from None
 
     @property
     @asynccontextmanager
     async def http_client(self):
         """
-        A property that returns an httpx.AsyncClient instance that is used for a 'with' statement.
+        A property that returns a httpx.AsyncClient instance that is used for a 'with' statement.
         Example:
             async with self.http_client as client:
                 client.post(url, data=data)
@@ -45,22 +47,26 @@ class AsyncDiscordWebhook(DiscordWebhook):
         yield client
         await client.aclose()
 
-    async def api_post_request(self, url):
+    async def api_post_request(self):
         async with self.http_client as client:  # type: httpx.AsyncClient
             if bool(self.files) is False:
                 response = await client.post(
-                    url, json=self.json, params={"wait": True}, timeout=self.timeout
+                    self.url,
+                    json=self.json,
+                    params={'wait': True},
+                    timeout=self.timeout,
                 )
             else:
                 self.files["payload_json"] = (
                     None,
-                    json.dumps(self.json).encode("utf-8"),
+                    json.dumps(self.json).encode('utf-8'),
                 )
                 response = await client.post(
-                    url, files=self.files, timeout=self.timeout
+                    self.url, files=self.files, timeout=self.timeout
                 )
         return response
 
+   
     async def execute(self, remove_embeds=False, remove_files=False):
         """
         executes the Webhook
@@ -110,12 +116,14 @@ class AsyncDiscordWebhook(DiscordWebhook):
                         content=response.content.decode("utf-8"),
                     )
                 )
-            responses.append(response)
+            )
         if remove_embeds:
             self.remove_embeds()
         if remove_files:
             self.remove_files()
-        return responses[0] if len(responses) == 1 else responses
+        if webhook_id := json.loads(response.content.decode("utf-8")).get('id'):
+            self.id = webhook_id
+        return response
 
     async def edit(self, sent_message_id):
         """
@@ -184,8 +192,8 @@ class AsyncDiscordWebhook(DiscordWebhook):
                             content=response.content.decode("utf-8"),
                         )
                     )
-                responses.append(response)
-        return responses[0] if len(responses) == 1 else responses
+                )
+            return response
 
     async def delete(self, sent_message_ids=[]):
         """
@@ -222,6 +230,8 @@ class AsyncDiscordWebhook(DiscordWebhook):
 
     async def get_wait_time(self, response) -> float:
         errors = response.json()
+        if not response.headers.get('Via'):
+                raise HTTPException(errors)
         return (int(errors["retry_after"]) / 1000) + 0.15
 
     async def handle_rate_limit(self, response):
