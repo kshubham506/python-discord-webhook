@@ -47,7 +47,7 @@ class AsyncDiscordWebhook(DiscordWebhook):
         yield client
         await client.aclose()
 
-    async def api_post_request(self):
+    async def api_post_request(self, url):
         async with self.http_client as client:  # type: httpx.AsyncClient
             if bool(self.files) is False:
                 response = await client.post(

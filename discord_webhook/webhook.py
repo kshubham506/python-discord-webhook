@@ -383,7 +383,7 @@ class DiscordWebhook:
         """
         self.files = {}
 
-    def api_post_request(self) -> requests.post:
+    def api_post_request(self, url) -> requests.post:
         if bool(self.files) is False:
             return requests.post(
                 self.url,
