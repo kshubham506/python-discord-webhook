@@ -10,14 +10,14 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name="discord-webhook",
-    version="0.20.0",
+    version="0.21.0",
     packages=find_packages(),
     include_package_data=True,
     license="MIT License",
     description="execute discord webhooks",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/lovvskillz/python-discord-webhook",
+    url="https://github.com/kshubham506/python-discord-webhook",
     install_requires=[
         "requests>=2.19.1",
     ],

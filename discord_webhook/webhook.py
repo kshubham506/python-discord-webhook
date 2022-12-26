@@ -236,6 +236,7 @@ class DiscordWebhook:
     rate_limit_retry: bool = False
     rate_limit_max_sleep: Optional[float]
     rate_limit_max_retries: Optional[int] = (10,)
+    thread_name: Optional[str] = ("",)
     webhook_identifier: Optional[str] = ("",)
 
     def __init__(
@@ -255,6 +256,7 @@ class DiscordWebhook:
         rate_limit_max_retries: Optional[int] = 10,
         allowed_mentions: Optional[List[str]] = None,
         webhook_identifier: Optional[str] = "",
+        thread_name: Optional[str] = "",
     ) -> None:
         """
         Init Webhook for Discord.
@@ -294,6 +296,7 @@ class DiscordWebhook:
         self.rate_limit_max_sleep = rate_limit_max_sleep
         self.rate_limit_max_retries = rate_limit_max_retries
         self.webhook_identifier = webhook_identifier
+        self.thread_name = thread_name
 
     def add_file(self, file: bytes, filename: str) -> None:
         """
@@ -410,7 +413,7 @@ class DiscordWebhook:
         """
         while response.status_code == 429:
             errors = json.loads(response.content.decode("utf-8"))
-            if not response.headers.get('Via'):
+            if not response.headers.get("Via"):
                 raise HTTPException(errors)
             wh_sleep = (int(errors["retry_after"]) / 1000) + 0.15
             logger.error(f"Webhook rate limited: sleeping for {wh_sleep} seconds...")
@@ -460,7 +463,7 @@ class DiscordWebhook:
             self.remove_embeds()
         if remove_files:
             self.remove_files()
-        if webhook_id := json.loads(response.content.decode("utf-8")).get('id'):
+        if webhook_id := json.loads(response.content.decode("utf-8")).get("id"):
             self.id = webhook_id
         return response
 
