@@ -136,6 +136,8 @@ class AsyncDiscordWebhook(DiscordWebhook):
         async with self.http_client as client:  # type: httpx.AsyncClient
             for i, message_id in enumerate(sent_message_id):
                 url = self.url.split("?")[0] + "/messages/" + str(message_id)
+                if self.thread_name:
+                    url += f"?thread_id={message_id}"
                 if bool(self.files) is False:
                     patch_kwargs = {
                         "json": self.json,
@@ -204,8 +206,11 @@ class AsyncDiscordWebhook(DiscordWebhook):
         responses = []
         async with self.http_client as client:  # type: httpx.AsyncClient
             for i, message_id in enumerate(sent_message_ids):
+                url = self.url.split("?")[0] + "/messages/" + str(message_id)
+                if self.thread_name:
+                    url += f"?thread_id={message_id}"
                 response = await client.delete(
-                    self.url.split("?")[0] + "/messages/" + str(message_id),
+                    url,
                     timeout=self.timeout,
                 )
                 if response.status_code in [200, 204]:

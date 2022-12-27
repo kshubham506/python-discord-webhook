@@ -10,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name="discord-webhook",
-    version="0.21.0",
+    version="0.22.0",
     packages=find_packages(),
     include_package_data=True,
     license="MIT License",
@@ -21,8 +21,8 @@ setup(
     install_requires=[
         "requests>=2.19.1",
     ],
-    author="Vadim Zifra",
-    author_email="vadim@minehub.de",
+    author="Shubham Kumar",
+    author_email="kshubham506@gmail.com",
     extras_require={"async": ["httpx>=0.20.0"]},
     classifiers=[
         "Environment :: Web Environment",
