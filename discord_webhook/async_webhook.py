@@ -135,9 +135,10 @@ class AsyncDiscordWebhook(DiscordWebhook):
         responses = []
         async with self.http_client as client:  # type: httpx.AsyncClient
             for i, message_id in enumerate(sent_message_id):
-                url = self.url.split("?")[0] + "/messages/" + str(message_id)
-                if self.thread_name:
-                    url += f"?thread_id={message_id}"
+                splitted_message_id = str(message_id).split("#")
+                url = self.url.split("?")[0] + "/messages/" + splitted_message_id[0]
+                if len(splitted_message_id) > 1:
+                    url += f"?thread_id={splitted_message_id[1]}"
                 if bool(self.files) is False:
                     patch_kwargs = {
                         "json": self.json,
@@ -199,16 +200,17 @@ class AsyncDiscordWebhook(DiscordWebhook):
     async def delete(self, sent_message_ids=[]):
         """
         deletes the webhook passed as a response
-        :param sent_message_ids: message ids
+        :param sent_message_ids: format - channelids#messageid or messageid
         :return: Response
         """
         webhook_len = len(sent_message_ids)
         responses = []
         async with self.http_client as client:  # type: httpx.AsyncClient
             for i, message_id in enumerate(sent_message_ids):
-                url = self.url.split("?")[0] + "/messages/" + str(message_id)
-                if self.thread_name:
-                    url += f"?thread_id={message_id}"
+                splitted_message_id = str(message_id).split("#")
+                url = self.url.split("?")[0] + "/messages/" + splitted_message_id[0]
+                if len(splitted_message_id) > 1:
+                    url += f"?thread_id={splitted_message_id[1]}"
                 response = await client.delete(
                     url,
                     timeout=self.timeout,
